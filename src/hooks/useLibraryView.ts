@@ -49,7 +49,7 @@ export function useLibraryView() {
     })
     const catTiles: CategoryTile[] = Object.keys(catMap)
       .sort((a, b) => catMap[b].length - catMap[a].length)
-      .map((tag) => ({ tag, count: catMap[tag].length, covers: catMap[tag].slice(0, 3).map((c) => cover(c.c)) }))
+      .map((tag) => ({ tag, count: catMap[tag].length, covers: catMap[tag].slice(0, 3).map((c) => cover(c.c, c.coverImage)) }))
 
     const showCatTiles = tab === 'category' && !categoryFilter
 

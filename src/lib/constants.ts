@@ -7,27 +7,25 @@ export const STATUS: Record<StatusKey, { label: string; color: string }> = {
   paused: { label: '暫停中', color: '#9a8f7d' },
   dropped: { label: '已棄坑', color: '#b23b3b' },
   none: { label: '尚未開始', color: '#b8ad9a' },
+  interested: { label: '有興趣', color: '#c2588a' },
 }
 
-export const ORDER: StatusKey[] = ['reading', 'waiting', 'done', 'paused', 'dropped', 'none']
+export const ORDER: StatusKey[] = ['reading', 'waiting', 'done', 'paused', 'dropped', 'none', 'interested']
 
 export const ED: Record<Edition, string> = { tw: '台版', jp: '日版' }
 
 export const SHELF: Record<Group, string> = {
   collection: '書櫃',
-  interested: '有興趣',
   physical: '實體書',
 }
 
 export const SHELF_TITLE: Record<Group, string> = {
   collection: '我的收藏',
-  interested: '有興趣清單',
   physical: '我的實體書',
 }
 
 export const SHELF_KICKER: Record<Group, string> = {
   collection: 'My Library',
-  interested: 'Want to Read',
   physical: 'Physical Shelf',
 }
 
@@ -55,10 +53,6 @@ export const SEED_COMICS: Comic[] = [
   { id: 8, g: 'collection', title: '十號房的秘密', author: '周 頎', s: 'reading', cur: 28, total: 33, c: '#33574a', tags: ['懸疑', '校園'], link: '#' },
   { id: 9, g: 'collection', title: '風之谷道', author: '伊藤 巧', s: 'done', cur: 30, total: 30, c: '#a86a48', tags: ['旅行', '散文'], link: '#' },
   { id: 10, g: 'collection', title: '白鯨紀', author: 'M. Cole', s: 'waiting', cur: 66, total: null, c: '#2f3e5c', tags: ['奇幻', '連載中'], link: '#' },
-  { id: 11, g: 'interested', title: '霧港夜曲', author: '安 曇', s: 'none', cur: 0, total: 52, c: '#4b4a63', tags: ['推理'], link: '#' },
-  { id: 12, g: 'interested', title: '向陽花房', author: '小野 花', s: 'none', cur: 0, total: 18, c: '#8a7a2e', tags: ['園藝', '日常'], link: '#' },
-  { id: 13, g: 'interested', title: '齒輪之心', author: 'K. Lund', s: 'none', cur: 0, total: null, c: '#455a5e', tags: ['蒸汽龐克'], link: '#' },
-  { id: 14, g: 'interested', title: '落雪成詩', author: '徐 冷', s: 'none', cur: 0, total: 36, c: '#5c4a52', tags: ['純愛'], link: '#' },
   { id: 20, g: 'physical', title: '墨海航跡', author: '佐藤 遙', s: 'reading', cur: 8, total: 15, c: '#2f5d5b', ed: 'tw', tags: ['海洋'], link: '#' },
   { id: 21, g: 'physical', title: '街角的貓與雨', author: '林 晚', s: 'done', cur: 3, total: 3, c: '#b8752a', ed: 'tw', tags: ['日常'], link: '#' },
   { id: 22, g: 'physical', title: '花與刃', author: '千夜', s: 'reading', cur: 12, total: 20, c: '#6b4a63', ed: 'tw', tags: ['武俠'], link: '#' },

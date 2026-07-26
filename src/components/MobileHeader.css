@@ -59,17 +59,10 @@
   cursor: pointer;
 }
 
-.mheader__avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #cbbfa9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-2);
-  font-family: 'Newsreader', serif;
-  font-size: 15px;
+.mheader__search-btn--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fbf6ec;
 }
 
 .mheader__search-row {

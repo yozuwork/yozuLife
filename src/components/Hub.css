@@ -1,0 +1,102 @@
+.hub {
+  min-height: 100%;
+  background: var(--bg-page);
+  padding: 48px 32px;
+  box-sizing: border-box;
+}
+
+.hub__head {
+  max-width: 900px;
+  margin: 0 auto 32px;
+}
+
+.hub__kicker {
+  font-family: 'Newsreader', serif;
+  font-size: 13px;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}
+
+.hub__title {
+  margin: 2px 0 0;
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  font-size: 30px;
+  color: var(--ink);
+}
+
+.hub__grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+}
+
+.hub__card {
+  position: relative;
+  cursor: pointer;
+  background: var(--bg-white);
+  border: 1px solid var(--border-1);
+  border-radius: 16px;
+  padding: 24px 20px;
+  animation: fadeUp 0.4s both;
+  transition: transform 0.15s;
+}
+.hub__card:hover {
+  transform: translateY(-4px);
+}
+
+.hub__badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--tag-bg);
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+
+.hub__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 12px rgba(217, 84, 31, 0.3);
+}
+
+.hub__cardKicker {
+  font-family: 'Newsreader', serif;
+  font-size: 12px;
+  color: var(--text-3);
+  letter-spacing: 0.5px;
+}
+
+.hub__cardLabel {
+  margin-top: 2px;
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.hub__cardMeta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-1);
+}
+
+@media (max-width: 860px) {
+  .hub {
+    padding: 36px 20px;
+  }
+  .hub__title {
+    font-size: 25px;
+  }
+}

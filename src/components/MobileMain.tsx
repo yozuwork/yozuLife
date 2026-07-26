@@ -5,10 +5,12 @@ import BottomNav from './BottomNav'
 import FilterChips from './FilterChips'
 import ComicGrid from './ComicGrid'
 import CategoryTiles from './CategoryTiles'
+import SelectionBar from './SelectionBar'
 import './MobileMain.css'
 
 export default function MobileMain() {
   const view = useLibraryView()
+  const selectMode = useAppStore((s) => s.selectMode)
   const addingCat = useAppStore((s) => s.addingCat)
   const catDraft = useAppStore((s) => s.catDraft)
   const toggleAddCat = useAppStore((s) => s.toggleAddCat)
@@ -20,6 +22,7 @@ export default function MobileMain() {
       <MobileHeader />
       {view.showGrid && <FilterChips filters={view.filters} />}
       <div className="mmain__scroll appscroll">
+        {view.showGrid && selectMode && <SelectionBar ids={view.cards.map((c) => c.id)} />}
         {view.showCatTiles && (
           <div className="mmain__catrow">
             {addingCat ? (

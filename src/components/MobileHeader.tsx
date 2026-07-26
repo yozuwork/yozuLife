@@ -11,6 +11,9 @@ export default function MobileHeader() {
   const searchText = useAppStore((s) => s.searchText)
   const toggleSearch = useAppStore((s) => s.toggleSearch)
   const setSearch = useAppStore((s) => s.setSearch)
+  const selectMode = useAppStore((s) => s.selectMode)
+  const toggleSelectMode = useAppStore((s) => s.toggleSelectMode)
+  const setSection = useAppStore((s) => s.setSection)
 
   const showBack = tab === 'category' && !!categoryFilter
   const tabTitle =
@@ -33,12 +36,24 @@ export default function MobileHeader() {
           <h1 className="mheader__title">{tabTitle}</h1>
         </div>
         <div className="mheader__actions">
+          <button className="mheader__search-btn" onClick={() => setSection('hub')}>
+            <span className="ms" style={{ fontSize: 21 }}>
+              home
+            </span>
+          </button>
           <button className="mheader__search-btn" onClick={() => toggleSearch()}>
             <span className="ms" style={{ fontSize: 21 }}>
               search
             </span>
           </button>
-          <div className="mheader__avatar">Y</div>
+          <button
+            className={`mheader__search-btn${selectMode ? ' mheader__search-btn--active' : ''}`}
+            onClick={() => toggleSelectMode()}
+          >
+            <span className="ms" style={{ fontSize: 21 }}>
+              checklist
+            </span>
+          </button>
         </div>
       </div>
       {searchOpen && (

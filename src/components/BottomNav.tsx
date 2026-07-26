@@ -4,7 +4,6 @@ import './BottomNav.css'
 
 const NAV: { key: Group | 'category' | 'add' | 'search'; icon: string; label: string }[] = [
   { key: 'collection', icon: 'auto_stories', label: '書櫃' },
-  { key: 'interested', icon: 'favorite', label: '有興趣' },
   { key: 'physical', icon: 'inventory_2', label: '實體書' },
   { key: 'category', icon: 'category', label: '分類' },
   { key: 'add', icon: 'add', label: '新增' },
@@ -24,7 +23,7 @@ export default function BottomNav() {
         const active = n.key === tab || (n.key === 'search' && searchOpen)
         const isAdd = n.key === 'add'
         const onClick =
-          n.key === 'collection' || n.key === 'interested' || n.key === 'physical' || n.key === 'category'
+          n.key === 'collection' || n.key === 'physical' || n.key === 'category'
             ? () => setTab(n.key as Group | 'category')
             : n.key === 'add'
               ? () => openAdd()

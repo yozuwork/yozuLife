@@ -1,13 +1,14 @@
+import { useEffect, useRef, useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 import { ED, ORDER, PALETTE, STATUS } from '../lib/constants'
 import { cover, splitTags } from '../lib/helpers'
+import { compressCover, fetchLinkMetadata } from '../lib/coverTools'
 import TagEditor from './TagEditor'
 import type { Edition, Group } from '../lib/types'
 import './ComicForm.css'
 
 const CAT_OPTIONS: { key: Group; label: string }[] = [
   { key: 'collection', label: '我的收藏' },
-  { key: 'interested', label: '有興趣清單' },
   { key: 'physical', label: '實體書' },
 ]
 
@@ -17,9 +18,50 @@ export default function ComicForm({ isMobile }: { isMobile: boolean }) {
   const closeAdd = useAppStore((s) => s.closeAdd)
   const setDraft = useAppStore((s) => s.setDraft)
   const saveDraft = useAppStore((s) => s.saveDraft)
+  const [linkState, setLinkState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [linkMessage, setLinkMessage] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const lastFetchedLink = useRef('')
 
   const tagList = splitTags(draft.tags)
   const canSave = !!draft.title.trim()
+
+  useEffect(() => {
+    const link = draft.link.trim()
+    if (!/^https?:\/\/\S+$/i.test(link) || link === lastFetchedLink.current) return
+    const timer = window.setTimeout(async () => {
+      lastFetchedLink.current = link
+      setLinkState('loading')
+      setLinkMessage('正在讀取作品標題…')
+      try {
+        const metadata = await fetchLinkMetadata(link)
+        if (useAppStore.getState().draft.link.trim() !== link) return
+        if (!useAppStore.getState().draft.title.trim() && metadata.title) setDraft('title', metadata.title)
+        if (!metadata.title) throw new Error('這個網站沒有提供作品標題')
+        setLinkState('success')
+        setLinkMessage('已自動帶入作品標題；封面請自行上傳')
+      } catch (error) {
+        setLinkState('error')
+        setLinkMessage(error instanceof Error ? error.message : '無法讀取網站資料，仍可手動填寫')
+      }
+    }, 650)
+    return () => window.clearTimeout(timer)
+  }, [draft.link, setDraft])
+
+  const handleCoverUpload = async (file?: File) => {
+    if (!file) return
+    setUploading(true)
+    try {
+      setDraft('coverImage', await compressCover(file))
+      setLinkMessage('封面已壓縮並套用')
+      setLinkState('success')
+    } catch (error) {
+      setLinkMessage(error instanceof Error ? error.message : '圖片處理失敗')
+      setLinkState('error')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   return (
     <div className="form__overlay" onClick={() => closeAdd()}>
@@ -35,9 +77,15 @@ export default function ComicForm({ isMobile }: { isMobile: boolean }) {
           </div>
 
           <div className="form__coverRow">
-            <div className="form__coverPreview" style={{ background: cover(draft.c) }}>
-              <span className="form__coverHint">封面色</span>
-            </div>
+            <label className="form__coverPreview" style={{ background: cover(draft.c, draft.coverImage) }}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="form__coverFile"
+                onChange={(e) => handleCoverUpload(e.target.files?.[0])}
+              />
+              <span className="form__coverHint">{uploading ? '壓縮中…' : draft.coverImage ? '點擊更換封面' : '上傳封面'}</span>
+            </label>
             <div className="form__swatchWrap">
               <label className="form__label">封面顏色</label>
               <div className="form__swatches">
@@ -50,7 +98,22 @@ export default function ComicForm({ isMobile }: { isMobile: boolean }) {
                   />
                 ))}
               </div>
-              {!isMobile && <div className="form__swatchNote">日後可換成上傳的封面圖</div>}
+              <div className="form__coverActions">
+                <label className="form__uploadBtn">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onChange={(e) => handleCoverUpload(e.target.files?.[0])}
+                  />
+                  {uploading ? '圖片壓縮中…' : '上傳圖片'}
+                </label>
+                {draft.coverImage && (
+                  <button type="button" className="form__removeCover" onClick={() => setDraft('coverImage', '')}>
+                    移除
+                  </button>
+                )}
+              </div>
+              {!isMobile && <div className="form__swatchNote">圖片會自動縮小並壓成 WebP</div>}
             </div>
           </div>
 
@@ -77,6 +140,7 @@ export default function ComicForm({ isMobile }: { isMobile: boolean }) {
             placeholder="https:// …"
             className="form__input"
           />
+          {linkState !== 'idle' && <div className={`form__linkStatus form__linkStatus--${linkState}`}>{linkMessage}</div>}
 
           <label className="form__label">收藏分類</label>
           <div className="form__chiprow">

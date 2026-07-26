@@ -4,10 +4,12 @@ import DesktopHeader from './DesktopHeader'
 import FilterChips from './FilterChips'
 import ComicGrid from './ComicGrid'
 import CategoryTiles from './CategoryTiles'
+import SelectionBar from './SelectionBar'
 import './DesktopMain.css'
 
 export default function DesktopMain() {
   const view = useLibraryView()
+  const selectMode = useAppStore((s) => s.selectMode)
   const addingCat = useAppStore((s) => s.addingCat)
   const catDraft = useAppStore((s) => s.catDraft)
   const toggleAddCat = useAppStore((s) => s.toggleAddCat)
@@ -67,6 +69,7 @@ export default function DesktopMain() {
           <div className="dmain__count">{view.countText}</div>
         </div>
 
+        {view.showGrid && selectMode && <SelectionBar ids={view.cards.map((c) => c.id)} />}
         {view.showGrid && <FilterChips filters={view.filters} />}
         {view.showCatTiles && <CategoryTiles tiles={view.catTiles} />}
         {view.showGrid && <ComicGrid cards={view.cards} showShelf={view.tab === 'category'} />}

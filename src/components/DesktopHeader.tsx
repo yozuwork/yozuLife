@@ -5,6 +5,8 @@ export default function DesktopHeader() {
   const openAdd = useAppStore((s) => s.openAdd)
   const searchText = useAppStore((s) => s.searchText)
   const setSearch = useAppStore((s) => s.setSearch)
+  const selectMode = useAppStore((s) => s.selectMode)
+  const toggleSelectMode = useAppStore((s) => s.toggleSelectMode)
 
   return (
     <header className="dheader">
@@ -19,6 +21,15 @@ export default function DesktopHeader() {
           className="dheader__search-input"
         />
       </div>
+      <button
+        className={`dheader__select${selectMode ? ' dheader__select--active' : ''}`}
+        onClick={() => toggleSelectMode()}
+      >
+        <span className="ms" style={{ fontSize: 20 }}>
+          checklist
+        </span>
+        多選
+      </button>
       <button className="dheader__add" onClick={() => openAdd()}>
         <span className="ms" style={{ fontSize: 20 }}>
           add

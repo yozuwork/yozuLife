@@ -1,0 +1,73 @@
+.soon {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-page);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.soon__card {
+  width: min(360px, 100%);
+  text-align: center;
+  background: var(--bg-white);
+  border: 1px solid var(--border-1);
+  border-radius: 18px;
+  padding: 40px 32px;
+  animation: fadeUp 0.4s both;
+}
+
+.soon__icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
+  border-radius: 16px;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(217, 84, 31, 0.3);
+}
+
+.soon__badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--tag-bg);
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.soon__title {
+  margin: 0 0 8px;
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  font-size: 24px;
+  color: var(--ink);
+}
+
+.soon__desc {
+  margin: 0 0 26px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.soon__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 9px 18px 9px 12px;
+  border: none;
+  border-radius: 22px;
+  background: var(--tag-bg);
+  color: var(--ink);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.soon__back:hover {
+  background: var(--border-2);
+}

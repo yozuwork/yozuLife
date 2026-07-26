@@ -1,7 +1,7 @@
 .detail__overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 60;
   background: rgba(28, 24, 19, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
@@ -36,11 +36,12 @@
 
 .detail__closerow {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-bottom: 6px;
 }
 
-.detail__closebtn {
+.detail__closebtn,
+.detail__deletebtn {
   width: 38px;
   height: 38px;
   border-radius: 11px;
@@ -55,6 +56,18 @@
 .detail__closebtn:hover {
   background: #f0ebe1;
 }
+.detail__deletebtn:hover {
+  background: #f7e7e2;
+  border-color: #e0b3a4;
+  color: #b23b3b;
+}
+
+.detail__mobiletop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
 
 .detail__mobileclose {
   display: inline-flex;
@@ -67,7 +80,6 @@
   color: var(--text-2);
   font-size: 13px;
   cursor: pointer;
-  margin-bottom: 16px;
 }
 
 .detail__top {
@@ -82,9 +94,12 @@
   border-radius: 11px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(38, 34, 29, 0.22);
+  position: relative;
   display: flex;
   align-items: flex-end;
-  padding: 11px;
+  justify-content: center;
+  padding: 10px;
+  cursor: pointer;
 }
 
 .detail__panel--sheet .detail__cover {
@@ -92,13 +107,28 @@
   height: 140px;
 }
 
-.detail__coverTitle {
-  font-family: 'Noto Serif TC', serif;
-  font-weight: 700;
-  font-size: 15px;
-  line-height: 1.25;
-  color: #fbf6ec;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+.detail__coverHint {
+  font-size: 11px;
+  color: rgba(251, 246, 236, 0.85);
+  text-align: center;
+  background: rgba(25, 21, 18, 0.58);
+  border-radius: 999px;
+  padding: 4px 7px;
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.detail__cover:hover .detail__coverHint,
+.detail__coverHint--visible {
+  opacity: 1;
+}
+
+.detail__coverFile {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .detail__fields {
@@ -298,9 +328,22 @@
 }
 
 .detail__countNum {
+  width: 100%;
   font-family: 'Newsreader', serif;
   font-size: 32px;
   line-height: 1;
+  text-align: center;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  outline: none;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+}
+.detail__countNum::-webkit-outer-spin-button,
+.detail__countNum::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .detail__panel--sheet .detail__countNum {
   font-size: 30px;

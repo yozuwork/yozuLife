@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useAppStore } from '../store/useAppStore'
 import { ED, ORDER, STATUS } from '../lib/constants'
 import { computeBar, cover, progText, unitOf } from '../lib/helpers'
+import { compressCover } from '../lib/coverTools'
 import TagEditor from './TagEditor'
 import type { Edition } from '../lib/types'
 import './DetailPanel.css'
@@ -9,6 +11,7 @@ export default function DetailPanel({ isMobile }: { isMobile: boolean }) {
   const selectedId = useAppStore((s) => s.selectedId)
   const comics = useAppStore((s) => s.comics)
   const close = useAppStore((s) => s.close)
+  const deleteComic = useAppStore((s) => s.deleteComic)
   const inc = useAppStore((s) => s.inc)
   const dec = useAppStore((s) => s.dec)
   const setCur = useAppStore((s) => s.setCur)
@@ -16,6 +19,7 @@ export default function DetailPanel({ isMobile }: { isMobile: boolean }) {
   const setField = useAppStore((s) => s.setField)
   const addTag = useAppStore((s) => s.addTag)
   const removeTag = useAppStore((s) => s.removeTag)
+  const [coverUploading, setCoverUploading] = useState(false)
 
   const cm = comics.find((c) => c.id === selectedId)
   if (!cm) return null
@@ -25,19 +29,49 @@ export default function DetailPanel({ isMobile }: { isMobile: boolean }) {
   const hasGrid = cm.total != null && cm.total > 0 && cm.total <= gridLimit
   const hasLink = !!cm.link && cm.link !== '#'
 
+  const remove = () => {
+    if (window.confirm(`確定要刪除「${cm.title}」嗎？此動作無法復原。`)) {
+      deleteComic(cm.id)
+    }
+  }
+
+  const handleCoverUpload = async (file?: File) => {
+    if (!file) return
+    setCoverUploading(true)
+    try {
+      setField(cm.id, 'coverImage', await compressCover(file))
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : '圖片處理失敗')
+    } finally {
+      setCoverUploading(false)
+    }
+  }
+
   return (
     <div className="detail__overlay" onClick={() => close()}>
       <div className={`detail__panel${isMobile ? ' detail__panel--sheet' : ' detail__panel--drawer'}`} onClick={(e) => e.stopPropagation()}>
         <div className="detail__body">
           {isMobile ? (
-            <button className="detail__mobileclose" onClick={() => close()}>
-              <span className="ms" style={{ fontSize: 19 }}>
-                chevron_left
-              </span>
-              書櫃
-            </button>
+            <div className="detail__mobiletop">
+              <button className="detail__mobileclose" onClick={() => close()}>
+                <span className="ms" style={{ fontSize: 19 }}>
+                  chevron_left
+                </span>
+                書櫃
+              </button>
+              <button className="detail__deletebtn" onClick={remove}>
+                <span className="ms" style={{ fontSize: 19 }}>
+                  delete
+                </span>
+              </button>
+            </div>
           ) : (
             <div className="detail__closerow">
+              <button className="detail__deletebtn" onClick={remove}>
+                <span className="ms" style={{ fontSize: 20 }}>
+                  delete
+                </span>
+              </button>
               <button className="detail__closebtn" onClick={() => close()}>
                 <span className="ms" style={{ fontSize: 20 }}>
                   close
@@ -47,9 +81,17 @@ export default function DetailPanel({ isMobile }: { isMobile: boolean }) {
           )}
 
           <div className="detail__top">
-            <div className="detail__cover" style={{ background: cover(cm.c) }}>
-              <div className="detail__coverTitle">{cm.title}</div>
-            </div>
+            <label className="detail__cover" style={{ background: cover(cm.c, cm.coverImage) }}>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="detail__coverFile"
+                onChange={(e) => handleCoverUpload(e.target.files?.[0])}
+              />
+              <span className={`detail__coverHint${isMobile ? ' detail__coverHint--visible' : ''}`}>
+                {coverUploading ? '壓縮中…' : '更換封面'}
+              </span>
+            </label>
             <div className="detail__fields">
               <input
                 value={cm.title}
@@ -134,7 +176,14 @@ export default function DetailPanel({ isMobile }: { isMobile: boolean }) {
                 <span className="ms">remove</span>
               </button>
               <div className="detail__count">
-                <div className="detail__countNum">{cm.cur}</div>
+                <input
+                  type="number"
+                  min={0}
+                  max={cm.total ?? undefined}
+                  value={cm.cur}
+                  onChange={(e) => setCur(cm.id, parseInt(e.target.value, 10) || 0)}
+                  className="detail__countNum"
+                />
                 <div className="detail__countTotal">
                   / {cm.total == null ? '—' : cm.total} {unitOf(cm)}
                 </div>

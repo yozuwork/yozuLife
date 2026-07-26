@@ -24,6 +24,7 @@
   font-size: 22px;
   margin-bottom: 20px;
   box-shadow: 0 4px 12px rgba(217, 84, 31, 0.35);
+  cursor: pointer;
 }
 
 .rail__item {

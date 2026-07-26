@@ -1,0 +1,51 @@
+.selbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fbf6ec;
+}
+
+.selbar__count {
+  font-size: 13px;
+}
+
+.selbar__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.selbar__btn {
+  padding: 7px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(251, 246, 236, 0.3);
+  background: transparent;
+  color: #fbf6ec;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.selbar__btn:hover {
+  background: rgba(251, 246, 236, 0.12);
+}
+.selbar__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.selbar__btn:disabled:hover {
+  background: transparent;
+}
+
+.selbar__btn--danger {
+  border-color: transparent;
+  background: #b23b3b;
+}
+.selbar__btn--danger:hover {
+  background: #9a3232;
+}
+.selbar__btn--danger:disabled {
+  background: #b23b3b;
+}

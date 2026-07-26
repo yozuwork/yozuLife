@@ -15,9 +15,14 @@ const emptyDraft = (g: Group): Draft => ({
   ed: 'tw',
   tags: '',
   c: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+  coverImage: '',
 })
 
+export type Section = 'hub' | 'manga' | 'music' | 'games' | 'anime'
+
 interface AppState {
+  section: Section
+  setSection: (s: Section) => void
   tab: TabKey
   filter: 'all' | StatusKey
   selectedId: number | null
@@ -31,6 +36,8 @@ interface AppState {
   editingId: number | null
   draft: Draft
   comics: Comic[]
+  selectMode: boolean
+  selectedIds: number[]
 
   setTab: (t: TabKey) => void
   setCategory: (tag: string | null) => void
@@ -42,6 +49,12 @@ interface AppState {
   close: () => void
   toggleSearch: () => void
   setSearch: (v: string) => void
+
+  toggleSelectMode: () => void
+  toggleSelectItem: (id: number) => void
+  selectAllVisible: (ids: number[]) => void
+  deleteSelected: () => void
+  deleteComic: (id: number) => void
 
   patch: (id: number, fn: (c: Comic) => Comic) => void
   setCur: (id: number, n: number) => void
@@ -62,6 +75,8 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
+      section: 'hub',
+      setSection: (s) => set({ section: s }),
       tab: 'collection',
       filter: 'all',
       selectedId: null,
@@ -75,8 +90,11 @@ export const useAppStore = create<AppState>()(
       editingId: null,
       draft: emptyDraft('collection'),
       comics: SEED_COMICS,
+      selectMode: false,
+      selectedIds: [],
 
-      setTab: (t) => set({ tab: t, filter: 'all', selectedId: null, adding: false, categoryFilter: null }),
+      setTab: (t) =>
+        set({ tab: t, filter: 'all', selectedId: null, adding: false, categoryFilter: null, selectMode: false, selectedIds: [] }),
       setCategory: (tag) => set({ categoryFilter: tag, filter: 'all' }),
       toggleAddCat: () => set((s) => ({ addingCat: !s.addingCat, catDraft: '' })),
       setCatDraft: (v) => set({ catDraft: v }),
@@ -95,12 +113,36 @@ export const useAppStore = create<AppState>()(
       toggleSearch: () => set((s) => ({ searchOpen: !s.searchOpen, searchText: '' })),
       setSearch: (v) => set({ searchText: v }),
 
+      toggleSelectMode: () => set((s) => ({ selectMode: !s.selectMode, selectedIds: [] })),
+      toggleSelectItem: (id) =>
+        set((s) => {
+          const has = s.selectedIds.includes(id)
+          return { selectedIds: has ? s.selectedIds.filter((x) => x !== id) : [...s.selectedIds, id] }
+        }),
+      selectAllVisible: (ids) =>
+        set((s) => {
+          const allSelected = ids.length > 0 && ids.every((id) => s.selectedIds.includes(id))
+          return { selectedIds: allSelected ? [] : ids }
+        }),
+      deleteSelected: () =>
+        set((s) => ({
+          comics: s.comics.filter((c) => !s.selectedIds.includes(c.id)),
+          selectedIds: [],
+          selectMode: false,
+        })),
+      deleteComic: (id) =>
+        set((s) => ({
+          comics: s.comics.filter((c) => c.id !== id),
+          selectedId: s.selectedId === id ? null : s.selectedId,
+          selectedIds: s.selectedIds.filter((x) => x !== id),
+        })),
+
       patch: (id, fn) => set((s) => ({ comics: s.comics.map((c) => (c.id === id ? fn({ ...c }) : c)) })),
       setCur: (id, n) => {
         get().patch(id, (c) => {
           const cap = c.total == null ? Math.max(n, c.cur, 99999) : c.total
           c.cur = Math.max(0, Math.min(n, cap))
-          if (c.s === 'none' && c.cur > 0) c.s = 'reading'
+          if ((c.s === 'none' || c.s === 'interested') && c.cur > 0) c.s = 'reading'
           if (c.total != null && c.total > 0 && c.cur >= c.total) c.s = 'done'
           else if (c.s === 'done' && (c.total == null || c.cur < c.total)) c.s = 'reading'
           return c
@@ -118,7 +160,7 @@ export const useAppStore = create<AppState>()(
         get().patch(id, (c) => {
           c.s = key
           if (key === 'done' && c.total != null) c.cur = c.total
-          if (key === 'none') c.cur = 0
+          if (key === 'none' || key === 'interested') c.cur = 0
           return c
         })
       },
@@ -164,6 +206,7 @@ export const useAppStore = create<AppState>()(
             ed: c.ed || 'tw',
             tags: (c.tags || []).join('、'),
             c: c.c,
+            coverImage: c.coverImage || '',
           },
         })
       },
@@ -186,6 +229,7 @@ export const useAppStore = create<AppState>()(
           g: d.g,
           ed: d.ed || 'tw',
           c: d.c,
+          coverImage: d.coverImage || undefined,
           tags,
         }
         const editingId = get().editingId
@@ -203,6 +247,15 @@ export const useAppStore = create<AppState>()(
     {
       name: 'manga-collection-storage',
       partialize: (s) => ({ comics: s.comics, customCats: s.customCats }),
+      migrate: (persisted) => {
+        const state = persisted as { comics?: Comic[] }
+        if (state?.comics) state.comics = state.comics.filter((c) => (c.g as string) !== 'interested')
+        return state
+      },
     },
   ),
 )
+
+if (import.meta.env.DEV) {
+  ;(window as any).useAppStore = useAppStore
+}

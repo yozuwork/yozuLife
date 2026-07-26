@@ -33,6 +33,29 @@
   color: var(--ink);
 }
 
+.dheader__select {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border-1);
+  border-radius: 13px;
+  background: var(--bg-field);
+  color: var(--text-2);
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dheader__select:hover {
+  background: var(--tag-bg);
+}
+.dheader__select--active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fbf6ec;
+}
+
 .dheader__add {
   display: flex;
   align-items: center;
