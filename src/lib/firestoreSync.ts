@@ -10,17 +10,21 @@ export function startSync(uid: string) {
   stopSync()
   const ref = doc(db, 'users', uid)
 
-  unsubSnapshot = onSnapshot(ref, (snap) => {
-    const data = snap.data() as { comics?: unknown; customCats?: unknown } | undefined
-    if (!data) return
-    const json = JSON.stringify(data)
-    if (json === lastSynced) return
-    lastSynced = json
-    useAppStore.setState({
-      comics: (data.comics as any) ?? [],
-      customCats: (data.customCats as any) ?? [],
-    })
-  })
+  unsubSnapshot = onSnapshot(
+    ref,
+    (snap) => {
+      const data = snap.data() as { comics?: unknown; customCats?: unknown } | undefined
+      if (!data) return
+      const json = JSON.stringify(data)
+      if (json === lastSynced) return
+      lastSynced = json
+      useAppStore.setState({
+        comics: (data.comics as any) ?? [],
+        customCats: (data.customCats as any) ?? [],
+      })
+    },
+    (err) => console.error('Firestore 讀取失敗（可能是安全規則擋下這個帳號）', err),
+  )
 
   unsubStore = useAppStore.subscribe((state) => {
     const payload = { comics: state.comics, customCats: state.customCats }
