@@ -1,7 +1,7 @@
 {
   "name": "yozulife",
   "private": true,
-  "version": "0.1.0",
+  "version": "2.4.6",
   "type": "module",
   "homepage": "https://yozuwork.github.io/yozuLife/",
   "scripts": {
@@ -12,6 +12,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "bootstrap-icons": "1.13.2",
     "firebase": "^12.16.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
