@@ -1,3 +1,4 @@
+import { renderVideoSection } from './videos.js';
 import './account.js';
 import { renderMedicalSection } from './medical.js';
 import { renderMapsSection } from './maps.js';
@@ -70,6 +71,12 @@ if(!mapSection&&!mapsAdded){
 }
 if(mapSection){mapSection.feature='maps';save();}
 try{localStorage.setItem('yozulife:maps-section-added','1');}catch{}
+let videoSection=SECTIONS.find(s=>s.feature==='videos'||/影片|視頻/.test(s.name));
+if(!videoSection){
+ videoSection={id:'videos',name:'影片',group:'生活',icon:'bi:youtube',color:'#8B8245',keywords:'影片 收藏 video youtube bilibili',feature:'videos'};
+ SECTIONS.push(videoSection);state.order.push(videoSection.id);
+}
+videoSection.feature='videos';save();
 let query = '', filter = '全部', firstRender = true;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -351,7 +358,12 @@ function openDetail(sec){
   openId = sec.id;
   const medical = sec.feature==='medical' || /看[診整]|就醫/.test(sec.name);
   const maps = sec.feature==='maps' || /地圖/.test(sec.name);
-  document.querySelector('.d-empty').hidden = medical || maps;
+  const videos=sec.feature==='videos'||/影片|視頻/.test(sec.name);
+  document.querySelector('.d-empty').hidden = medical || maps || videos;
+  let videoContent=document.getElementById('videos-content');
+  if(!videoContent){videoContent=document.createElement('div');videoContent.id='videos-content';document.querySelector('.d-body').append(videoContent);}
+  videoContent.hidden=!videos;
+  if(videos)renderVideoSection(videoContent);
   const content = document.getElementById('medical-content');
   content.hidden = !medical;
   if(medical) renderMedicalSection(content);
