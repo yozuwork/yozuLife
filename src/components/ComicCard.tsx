@@ -14,7 +14,7 @@ export default function ComicCard({ comic, showShelf }: { comic: Comic; showShel
   const hasLink = !!comic.link && comic.link !== '#'
 
   return (
-    <div
+    <article
       className={`ccard${selectMode ? ' ccard--selectable' : ''}${selected ? ' ccard--selected' : ''}`}
       onClick={() => (selectMode ? toggleSelectItem(comic.id) : select(comic.id))}
     >
@@ -43,20 +43,22 @@ export default function ComicCard({ comic, showShelf }: { comic: Comic; showShel
         </div>
         <div className="ccard__progress">{progText(comic)}</div>
         {hasLink && (
-          <a
-            href={comic.link}
-            target="_blank"
-            rel="noreferrer"
-            className="ccard__read"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <span className="ms" style={{ fontSize: 15 }}>
-              menu_book
-            </span>
-            直接閱讀
-          </a>
+          <div className="ccard__actions">
+            <a
+              href={comic.link}
+              target="_blank"
+              rel="noreferrer"
+              className="ccard__read"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span className="ms" style={{ fontSize: 15 }}>
+                menu_book
+              </span>
+              直接閱讀
+            </a>
+          </div>
         )}
       </div>
-    </div>
+    </article>
   )
 }

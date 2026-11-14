@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { PALETTE, SEED_COMICS } from '../lib/constants'
 import { splitTags } from '../lib/helpers'
+import { mergeImportedPhysicalComics, PHYSICAL_IMPORT_VERSION } from '../lib/physicalLibrary'
 import type { Comic, Draft, Group, StatusKey, TabKey } from '../lib/types'
 
 const emptyDraft = (g: Group): Draft => ({
@@ -19,6 +20,7 @@ const emptyDraft = (g: Group): Draft => ({
 })
 
 export type Section = 'hub' | 'manga' | 'music' | 'games' | 'anime'
+export type CardSize = 'large' | 'medium' | 'small'
 
 interface AppState {
   section: Section
@@ -38,6 +40,8 @@ interface AppState {
   comics: Comic[]
   selectMode: boolean
   selectedIds: number[]
+  cardSize: CardSize
+  physicalImportVersion: number
 
   setTab: (t: TabKey) => void
   setCategory: (tag: string | null) => void
@@ -51,6 +55,7 @@ interface AppState {
   setSearch: (v: string) => void
 
   toggleSelectMode: () => void
+  setCardSize: (size: CardSize) => void
   toggleSelectItem: (id: number) => void
   selectAllVisible: (ids: number[]) => void
   deleteSelected: () => void
@@ -89,9 +94,11 @@ export const useAppStore = create<AppState>()(
       adding: false,
       editingId: null,
       draft: emptyDraft('collection'),
-      comics: SEED_COMICS,
+      comics: mergeImportedPhysicalComics(SEED_COMICS),
       selectMode: false,
       selectedIds: [],
+      cardSize: 'medium',
+      physicalImportVersion: PHYSICAL_IMPORT_VERSION,
 
       setTab: (t) =>
         set({ tab: t, filter: 'all', selectedId: null, adding: false, categoryFilter: null, selectMode: false, selectedIds: [] }),
@@ -114,6 +121,7 @@ export const useAppStore = create<AppState>()(
       setSearch: (v) => set({ searchText: v }),
 
       toggleSelectMode: () => set((s) => ({ selectMode: !s.selectMode, selectedIds: [] })),
+      setCardSize: (cardSize) => set({ cardSize }),
       toggleSelectItem: (id) =>
         set((s) => {
           const has = s.selectedIds.includes(id)
@@ -140,6 +148,7 @@ export const useAppStore = create<AppState>()(
       patch: (id, fn) => set((s) => ({ comics: s.comics.map((c) => (c.id === id ? fn({ ...c }) : c)) })),
       setCur: (id, n) => {
         get().patch(id, (c) => {
+          c.ownedText = undefined
           const cap = c.total == null ? Math.max(n, c.cur, 99999) : c.total
           c.cur = Math.max(0, Math.min(n, cap))
           if ((c.s === 'none' || c.s === 'interested') && c.cur > 0) c.s = 'reading'
@@ -234,7 +243,11 @@ export const useAppStore = create<AppState>()(
         }
         const editingId = get().editingId
         if (editingId) {
-          get().patch(editingId, (c) => Object.assign(c, rec))
+          get().patch(editingId, (c) => {
+            Object.assign(c, rec)
+            c.ownedText = undefined
+            return c
+          })
           set({ adding: false, editingId: null })
         } else {
           set((s) => {
@@ -246,10 +259,20 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'manga-collection-storage',
-      partialize: (s) => ({ comics: s.comics, customCats: s.customCats }),
+      version: 2,
+      partialize: (s) => ({
+        comics: s.comics,
+        customCats: s.customCats,
+        cardSize: s.cardSize,
+        physicalImportVersion: s.physicalImportVersion,
+      }),
       migrate: (persisted) => {
-        const state = persisted as { comics?: Comic[] }
+        const state = persisted as { comics?: Comic[]; physicalImportVersion?: number }
         if (state?.comics) state.comics = state.comics.filter((c) => (c.g as string) !== 'interested')
+        if ((state.physicalImportVersion || 0) < PHYSICAL_IMPORT_VERSION) {
+          state.comics = mergeImportedPhysicalComics(state.comics || [])
+          state.physicalImportVersion = PHYSICAL_IMPORT_VERSION
+        }
         return state
       },
     },

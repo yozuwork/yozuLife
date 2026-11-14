@@ -53,8 +53,4 @@ export const SEED_COMICS: Comic[] = [
   { id: 8, g: 'collection', title: '十號房的秘密', author: '周 頎', s: 'reading', cur: 28, total: 33, c: '#33574a', tags: ['懸疑', '校園'], link: '#' },
   { id: 9, g: 'collection', title: '風之谷道', author: '伊藤 巧', s: 'done', cur: 30, total: 30, c: '#a86a48', tags: ['旅行', '散文'], link: '#' },
   { id: 10, g: 'collection', title: '白鯨紀', author: 'M. Cole', s: 'waiting', cur: 66, total: null, c: '#2f3e5c', tags: ['奇幻', '連載中'], link: '#' },
-  { id: 20, g: 'physical', title: '墨海航跡', author: '佐藤 遙', s: 'reading', cur: 8, total: 15, c: '#2f5d5b', ed: 'tw', tags: ['海洋'], link: '#' },
-  { id: 21, g: 'physical', title: '街角的貓與雨', author: '林 晚', s: 'done', cur: 3, total: 3, c: '#b8752a', ed: 'tw', tags: ['日常'], link: '#' },
-  { id: 22, g: 'physical', title: '花與刃', author: '千夜', s: 'reading', cur: 12, total: 20, c: '#6b4a63', ed: 'tw', tags: ['武俠'], link: '#' },
-  { id: 23, g: 'physical', title: '星屑通信', author: 'Nao', s: 'reading', cur: 5, total: null, c: '#3f5f7a', ed: 'jp', tags: ['科幻'], link: '#' },
 ]

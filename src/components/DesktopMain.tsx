@@ -5,6 +5,7 @@ import FilterChips from './FilterChips'
 import ComicGrid from './ComicGrid'
 import CategoryTiles from './CategoryTiles'
 import SelectionBar from './SelectionBar'
+import ViewSizeToggle from './ViewSizeToggle'
 import './DesktopMain.css'
 
 export default function DesktopMain() {
@@ -66,7 +67,10 @@ export default function DesktopMain() {
             </div>
           )}
 
-          <div className="dmain__count">{view.countText}</div>
+          <div className="dmain__viewtools">
+            {view.showGrid && <ViewSizeToggle />}
+            <div className="dmain__count">{view.countText}</div>
+          </div>
         </div>
 
         {view.showGrid && selectMode && <SelectionBar ids={view.cards.map((c) => c.id)} />}

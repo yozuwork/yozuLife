@@ -59,6 +59,18 @@
   padding-bottom: 6px;
 }
 
+.dmain__viewtools {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 2px;
+}
+
+.dmain__viewtools .dmain__count {
+  padding-bottom: 0;
+  white-space: nowrap;
+}
+
 .dmain__catadd {
   display: flex;
   align-items: center;

@@ -17,6 +17,7 @@ export interface Comic {
   tags: string[]
   link: string
   note?: string
+  ownedText?: string
 }
 
 export interface Draft {

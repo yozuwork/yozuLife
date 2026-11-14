@@ -1,0 +1,57 @@
+.vsize {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid var(--border-1);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.vsize__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 48px;
+  height: 30px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.vsize__button:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.vsize__button--active {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(38, 34, 29, 0.16);
+}
+
+.vsize__button--active:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
+.vsize__icon {
+  font-size: 16px;
+}
+
+.vsize--compact {
+  margin: 6px 0 14px auto;
+  width: max-content;
+}
+
+@media (max-width: 430px) {
+  .vsize__button {
+    min-width: 43px;
+    padding: 0 7px;
+  }
+}

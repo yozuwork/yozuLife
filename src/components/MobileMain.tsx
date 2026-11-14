@@ -6,6 +6,7 @@ import FilterChips from './FilterChips'
 import ComicGrid from './ComicGrid'
 import CategoryTiles from './CategoryTiles'
 import SelectionBar from './SelectionBar'
+import ViewSizeToggle from './ViewSizeToggle'
 import './MobileMain.css'
 
 export default function MobileMain() {
@@ -22,6 +23,7 @@ export default function MobileMain() {
       <MobileHeader />
       {view.showGrid && <FilterChips filters={view.filters} />}
       <div className="mmain__scroll appscroll">
+        {view.showGrid && <ViewSizeToggle compact />}
         {view.showGrid && selectMode && <SelectionBar ids={view.cards.map((c) => c.id)} />}
         {view.showCatTiles && (
           <div className="mmain__catrow">

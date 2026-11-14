@@ -26,6 +26,7 @@ export function unitOf(cm: Comic): string {
 export function progText(cm: Comic): string {
   const u = unitOf(cm)
   if (cm.g === 'physical') {
+    if (cm.ownedText) return cm.ownedText
     if (cm.s === 'done' || (cm.total != null && cm.total > 0 && cm.cur >= cm.total))
       return `全 ${cm.total || cm.cur} ${u} · 已收齊`
     if (cm.total == null) return `已收 ${cm.cur} ${u}`
