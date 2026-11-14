@@ -1,3 +1,4 @@
+import { confirmDialog, notify } from './ui.js';
 import { storage } from './cloud-storage.js';
 import { getVideoSections, addVideoSection } from './video-sections.js';
 import { getAutoCover, getLinkMetadata, isWebUrl } from './video-links.js';
@@ -8,7 +9,7 @@ const safe=v=>isWebUrl(v)||/^data:image\/(jpeg|png|webp);base64,/.test(v)?v:'';
 const platform=url=>{try{const h=new URL(url).hostname;return /(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(h)?'YouTube':/(^|\.)bilibili\.com$|(^|\.)b23\.tv$/.test(h)?'Bilibili':h.replace(/^www\./,'');}catch{return '影片';}};
 let videos=[];try{const data=JSON.parse(storage.getItem(KEY)||'[]');if(Array.isArray(data))videos=data.filter(v=>v&&typeof v.id==='string'&&isWebUrl(v.url)).map(v=>({...v,tags:Array.isArray(v.tags)?v.tags:[],sections:Array.isArray(v.sections)?v.sections:[]}));}catch{}
 let active='全部',query='',sort='new',onlyFavorites=false;
-function persist(next){try{storage.setItem(KEY,JSON.stringify(next));videos=next;return true;}catch{alert('儲存空間不足，請縮小封面圖片後重試。這次變更尚未儲存。');return false;}}
+function persist(next){try{storage.setItem(KEY,JSON.stringify(next));videos=next;return true;}catch{notify('無法儲存，請確認同步狀態與瀏覽器空間。這次變更尚未儲存。',true);return false;}}
 export function renderVideoSection(root){
  root.innerHTML=`<div class="video-intro"><div><span class="video-eyebrow">THE VIDEO COLLECTION</span><p>留住那些，想再看一次的片刻。</p></div><button class="video-add" type="button"><i class="bi bi-plus-lg"></i> 收藏影片</button></div><div class="video-controls"><label class="video-search"><i class="bi bi-search"></i><input aria-label="搜尋影片" placeholder="搜尋標題、創作者、分區…" value="${esc(query)}"></label><button class="video-favorites" aria-pressed="${onlyFavorites}"><i class="bi bi-heart"></i> 最愛</button><select class="video-sort" aria-label="排序"><option value="new">最近收藏</option><option value="old">最早收藏</option><option value="title">標題排序</option></select></div><div class="video-tags" aria-label="影片分區"></div><div class="video-results" aria-live="polite"></div><div class="video-grid"></div>`;
  const draw=()=>{
@@ -42,7 +43,7 @@ function openEditor(existing,draw){
  modal.querySelector('[data-reset]').onclick=()=>{custom=false;f.cover.value='';cover=getAutoCover(f.url.value);preview();metadata();};
  async function readImage(file){if(!file?.type.startsWith('image/'))return;reading=true;error.textContent='';try{const bitmap=await createImageBitmap(file);const canvas=document.createElement('canvas');const scale=Math.min(1,1200/bitmap.width,1200/bitmap.height);canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();cover=canvas.toDataURL('image/webp',.82);custom=true;f.cover.value='';preview();}catch{error.textContent='圖片無法讀取，請試用 JPG、PNG 或 WebP。';}finally{reading=false;}}
  f.file.onchange=()=>readImage(f.file.files[0]);modal.addEventListener('paste',e=>{const file=[...e.clipboardData.items].find(i=>i.type.startsWith('image/'))?.getAsFile();if(file){e.preventDefault();readImage(file);}});
- modal.querySelector('[data-delete]')?.addEventListener('click',()=>{if(confirm('確定刪除這部收藏影片？')&&persist(videos.filter(v=>v.id!==existing.id))){draw();close();}});
+ modal.querySelector('[data-delete]')?.addEventListener('click',async ()=>{if((await confirmDialog({title:'刪除這部收藏影片？',description:existing.title}))&&persist(videos.filter(v=>v.id!==existing.id))){draw();close();}});
  form.onsubmit=e=>{e.preventDefault();if(reading){error.textContent='圖片處理中，請稍候。';return;}const url=f.url.value.trim();if(!isWebUrl(url)||!f.title.value.trim())return;if(videos.some(v=>v.url===url&&v.id!==existing?.id)){error.textContent='這部影片已經在收藏中。';return;}const record={id:existing?.id||crypto.randomUUID(),url,title:f.title.value.trim(),artist:f.artist.value.trim(),tags:existing?.tags||[],sections:[...selectedSections],note:f.note.value.trim(),cover:safe(cover)||getAutoCover(url),favorite:existing?.favorite||false,created:existing?.created||Date.now()};if(persist(existing?videos.map(v=>v.id===existing.id?record:v):[record,...videos])){draw();close();}};
  modal.showModal();f.url.focus();
 }

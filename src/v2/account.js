@@ -1,6 +1,10 @@
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, signInWithGoogle, signOutUser } from '../lib/firebase';
+import { auth, signOutUser } from '../lib/firebase';
+import { openSettings } from './settings.js';
+import { readAppearance, applyAppearance, defaultIcon } from './appearance.js';
+import { confirmDialog, notify } from './ui.js';
+import { hasPendingChanges } from './cloud-storage.js';
 
+const user = auth.currentUser;
 const name = document.getElementById('account-name');
 const status = document.getElementById('account-status');
 const button = document.getElementById('account-action');
@@ -12,69 +16,45 @@ function setStatus(text) {
   mobileStatus.hidden = !text;
 }
 window.addEventListener('yozu-sync-status', event => setStatus(event.detail));
-if (window.yozuSyncStatus) setStatus(window.yozuSyncStatus);
+setStatus(window.yozuSyncStatus || '正在同步至雲端…');
 window.addEventListener('yozu-remote-change', () => {
   if (document.getElementById('cloud-refresh')) return;
   const refresh = document.createElement('button');
-  refresh.id = 'cloud-refresh';
-  refresh.type = 'button';
-  refresh.textContent = '載入其他裝置的更新';
+  refresh.id = 'cloud-refresh'; refresh.className = 'yl-text-button';
+  refresh.type = 'button'; refresh.textContent = '載入其他裝置的更新 ↗';
   refresh.onclick = () => location.reload();
   status.parentElement.append(refresh);
+  notify('其他裝置有新的更新，請重新整理後繼續。');
 });
-let user = null;
-let busy = false;
-let ready = false;
-
-function renderAccount() {
-  name.textContent = user ? (user.displayName || user.email || '已登入') : '訪客模式';
-  button.textContent = busy ? '處理中…' : user ? '登出' : '使用 Google 登入';
-  button.disabled = busy || !ready;
-  mobileButton.querySelector('span').textContent = busy ? '處理中…' : user ? '登出' : '登入';
-  mobileButton.querySelector('i').className = user ? 'bi bi-box-arrow-right' : 'bi bi-box-arrow-in-right';
-  mobileButton.disabled = busy || !ready;
-  mobileButton.setAttribute('aria-label', user ? `登出 ${user.displayName || user.email || '帳號'}` : '使用 Google 登入');
-}
-
-onAuthStateChanged(auth, (currentUser) => {
-  user = currentUser;
-  ready = true;
-  renderAccount();
-}, () => {
-  setStatus('無法確認登入狀態，請重新整理後再試。');
-  button.textContent = '登入暫時無法使用';
-  button.disabled = true;
-  mobileButton.disabled = true;
-  mobileButton.querySelector('span').textContent = '無法登入';
-});
-
-async function handleAccountAction() {
-  if (busy || !ready) return;
-  busy = true;
-  setStatus('處理中…');
-  renderAccount();
+let leaving = false;
+async function logout() {
+  if (leaving) return false;
+  if (hasPendingChanges()) { notify('資料仍在同步，請等帳號列顯示已同步後再登出。', true); return false; }
+  leaving = true;
   try {
-    if (user) {
-      await signOutUser();
-      setStatus('已登出，分區設定仍儲存於此瀏覽器');
-    } else {
-      await signInWithGoogle();
-      setStatus('已登入，分區設定目前僅儲存於此瀏覽器');
-    }
-  } catch (error) {
-    const messages = {
-      'auth/popup-closed-by-user': '已取消登入，可隨時重試。',
-      'auth/cancelled-popup-request': '已取消登入，可隨時重試。',
-      'auth/popup-blocked': '瀏覽器封鎖了登入視窗，請允許彈出視窗後重試。',
-      'auth/unauthorized-domain': '此網站網域尚未加入 Firebase 的授權網域。',
-      'auth/network-request-failed': '網路連線失敗，請確認連線後重試。',
-      'auth/operation-not-allowed': 'Firebase 尚未啟用 Google 登入。',
-    };
-    setStatus(messages[error.code] || '操作失敗，請稍後再試。');
-  } finally {
-    busy = false;
-    renderAccount();
-  }
+    const accepted = await confirmDialog({ title: '暫別一下，生活待續。', description: '已同步的收藏會好好留在你的私人空間。準備好時，再回來繼續。', confirmLabel: '安心登出 ↗', danger: false });
+    if (!accepted) return false;
+    if (hasPendingChanges()) { notify('資料仍在同步，請稍候再登出。', true); return false; }
+    try { sessionStorage.setItem('yozu-signed-out', '1'); } catch {}
+    await signOutUser();
+    return true;
+  } catch (error) { notify(`登出失敗（${error.code || error.message}），請再試一次。`, true); return false; }
+  finally { leaving = false; }
 }
-button.addEventListener('click', handleAccountAction);
-mobileButton.addEventListener('click', handleAccountAction);
+const showSettings = () => openSettings(logout);
+name.textContent = user?.displayName || '我的生活收藏';
+const identity = document.createElement('div'); identity.className = 'yl-account-identity';
+const info = name.parentElement; info.before(identity); identity.append(info);
+const avatarButton = document.createElement('button'); avatarButton.type = 'button';
+avatarButton.className = 'yl-account-avatar-button'; avatarButton.setAttribute('aria-label', '開啟個人與外觀設定');
+const avatar = document.createElement('img'); avatar.className = 'yl-account-avatar'; avatar.alt = '我的大頭貼';
+avatar.dataset.accountAvatar = ''; avatar.dataset.googleAvatar = user?.photoURL || defaultIcon;
+avatar.referrerPolicy = 'no-referrer'; avatarButton.append(avatar); identity.prepend(avatarButton);
+avatarButton.onclick = showSettings;
+button.textContent = '個人設定 ↗'; button.disabled = false; button.onclick = showSettings;
+mobileButton.querySelector('span').textContent = '我的';
+mobileButton.disabled = false; mobileButton.setAttribute('aria-label', '開啟個人與外觀設定');
+const mobileAvatar = avatar.cloneNode(); mobileAvatar.className = 'yl-mobile-avatar';
+mobileButton.querySelector('i').after(mobileAvatar); mobileButton.onclick = showSettings;
+[avatar,mobileAvatar].forEach(img => img.onerror = () => { if (!img.src.endsWith('yozu-mark.svg')) img.src = defaultIcon; });
+applyAppearance(readAppearance());

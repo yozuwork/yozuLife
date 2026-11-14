@@ -1,3 +1,4 @@
+import { confirmDialog } from './ui.js';
 import { storage } from './cloud-storage.js';
 import { renderVideoSection } from './videos.js';
 import './account.js';
@@ -207,7 +208,7 @@ document.addEventListener('keydown', e=>{
   if(menu){setCardMenu(menu,false);menu.querySelector('summary').focus();e.preventDefault();}
 });
 
-$groups.addEventListener('click', e=>{
+$groups.addEventListener('click', async e=>{
   const summary=e.target.closest('.card-menu summary');
   if(summary){
     e.preventDefault();
@@ -223,8 +224,7 @@ $groups.addEventListener('click', e=>{
     const section = byId(remove.dataset.delete);
     const menu=remove.closest('.card-menu');
     if(menu){setCardMenu(menu,false);menu.querySelector('summary').focus();}
-    if(!section || !window.confirm(`確定要刪除這個分區嗎？
-「${section.name}」`)) return;
+    if(!section || !(await confirmDialog({title:'刪除這個分區？', description:section.name}))) return;
     SECTIONS = SECTIONS.filter(s=>s.id!==section.id);
     state.order = state.order.filter(id=>id!==section.id);
     state.pinned = state.pinned.filter(id=>id!==section.id);

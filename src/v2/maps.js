@@ -1,3 +1,4 @@
+import { confirmDialog } from './ui.js';
 import { storage } from './cloud-storage.js';
 import {MAPS_KEY,MODES,validMap,mapsURL,mapPreviewURL,initializeMaps,filterMaps} from './maps-data.js';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -70,7 +71,7 @@ export function renderMapsSection(root){
     }else{preview(item);message.textContent=item.type==='route'?'路線已準備好，點「Google Maps 開啟」查詢完整路線。':'已載入地點地圖。';}
   };
   $('#map-search').oninput=e=>{query=e.target.value;render();};
-  root.addEventListener('click',e=>{
+  root.addEventListener('click',async e=>{
     const button=e.target.closest('[data-map-category],[data-map-pin],[data-map-preview],[data-map-edit],[data-map-delete]');if(!button)return;
     if(button.hasAttribute('data-map-category')){category=button.dataset.mapCategory;render();return;}
     const id=button.dataset.mapPin||button.dataset.mapPreview||button.dataset.mapEdit||button.dataset.mapDelete;
@@ -81,7 +82,7 @@ export function renderMapsSection(root){
       editingId=id;for(const key of ['type','origin','destination','mode','title','category','note','website'])field(key).value=item[key]||'';field('pinned').checked=item.pinned;
       typeChanged();$('#map-save-details').open=true;$('#map-cancel').hidden=false;$('#map-save').textContent='儲存變更';field('title').focus();
     }
-    if(button.dataset.mapDelete&&confirm(`確定刪除「${item.title}」？`)){
+    if(button.dataset.mapDelete&&(await confirmDialog({title:'刪除地圖收藏？',description:item.title}))){
       if(persist(items.filter(i=>i.id!==id))){if(editingId===id)resetEdit();render();message.textContent='已刪除地圖。';}
     }
   },{signal:(()=>{root._mapsController?.abort();root._mapsController=new AbortController();return root._mapsController.signal;})()});

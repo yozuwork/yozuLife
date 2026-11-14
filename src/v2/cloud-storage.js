@@ -2,7 +2,8 @@ import { collection, doc, onSnapshot, writeBatch } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 export const ADMIN_UID = 'K6DbALyBPVdX8SkUf36TnyF20433';
-export const DATA_KEYS = ['yozulife:v1', 'yozulife:videos:v1', 'yozulife:video-sections:v1', 'yozulife:endocrinology:v1', 'yozulife:maps:v1', 'yozulife:medical-section-added', 'yozulife:maps-section-added', 'yozulife:maps:tsgh-keelung-added'];
+export const hasPendingChanges = () => pending.size > 0 || running;
+export const DATA_KEYS = ['yozulife:appearance:v1', 'yozulife:v1', 'yozulife:videos:v1', 'yozulife:video-sections:v1', 'yozulife:endocrinology:v1', 'yozulife:maps:v1', 'yozulife:medical-section-added', 'yozulife:maps-section-added', 'yozulife:maps:tsgh-keelung-added'];
 const values = new Map();
 const pending = new Map();
 let target, running = false, retryTimer, remoteChanged = false;

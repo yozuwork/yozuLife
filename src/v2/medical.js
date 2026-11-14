@@ -1,3 +1,4 @@
+import { confirmDialog } from './ui.js';
 import { storage } from './cloud-storage.js';
 import { VISIT_KEY, loadVisits, validVisit, splitVisits, taipeiDate, untilNextTaipeiDay } from './medical-data.js';
 
@@ -45,7 +46,7 @@ export function renderMedicalSection(root){
   }
   function reset(){form.reset();editingId=null;editor.querySelector('summary').textContent='＋ 新增看診紀錄';editor.open=false;}
   root.querySelector('#visit-cancel').onclick=reset;
-  root.onclick=e=>{
+  root.onclick=async e=>{
     const edit=e.target.closest('[data-edit]'), remove=e.target.closest('[data-remove]');
     if(edit){
       const visit=visits.find(v=>v.id===edit.dataset.edit); if(!visit) return;
@@ -54,7 +55,7 @@ export function renderMedicalSection(root){
       editor.querySelector('summary').textContent='編輯看診紀錄';editor.open=true;form.elements.namedItem('date').focus();
     }
     if(remove){
-      const visit=visits.find(v=>v.id===remove.dataset.remove);if(!visit || !confirm(`確定刪除 ${visit.date} 的看診紀錄？`))return;
+      const visit=visits.find(v=>v.id===remove.dataset.remove);if(!visit || !(await confirmDialog({title:'刪除看診紀錄？',description:`${visit.date} 的紀錄將會移除。`})))return;
       if(persist(visits.filter(v=>v.id!==visit.id))){if(editingId===visit.id)reset();render();message.textContent='已刪除看診紀錄。';}
     }
   };
