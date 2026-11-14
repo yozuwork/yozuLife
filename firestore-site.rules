@@ -1,0 +1,21 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == 'K6DbALyBPVdX8SkUf36TnyF20433';
+    }
+    match /mangas/{documentId} { allow read, write: if isAdmin(); }
+    match /books/{documentId} { allow read, write: if isAdmin(); }
+    match /categories/{documentId} { allow read, write: if isAdmin(); }
+    match /readingStatuses/{documentId} { allow read, write: if isAdmin(); }
+    match /shoppingCart/{documentId} { allow read, write: if isAdmin(); }
+    match /externalLinks/{documentId} { allow read, write: if isAdmin(); }
+    match /users/{userId} {
+      allow read, write: if isAdmin() && request.auth.uid == userId;
+      match /siteData/{documentId} {
+        allow read, write: if isAdmin() && request.auth.uid == userId;
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { storage } from './cloud-storage.js';
 import { getVideoSections, addVideoSection } from './video-sections.js';
 import { getAutoCover, getLinkMetadata, isWebUrl } from './video-links.js';
 import './videos.css';
@@ -5,9 +6,9 @@ const KEY='yozulife:videos:v1';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safe=v=>isWebUrl(v)||/^data:image\/(jpeg|png|webp);base64,/.test(v)?v:'';
 const platform=url=>{try{const h=new URL(url).hostname;return /(^|\.)youtube\.com$|(^|\.)youtu\.be$/.test(h)?'YouTube':/(^|\.)bilibili\.com$|(^|\.)b23\.tv$/.test(h)?'Bilibili':h.replace(/^www\./,'');}catch{return '影片';}};
-let videos=[];try{const data=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(data))videos=data.filter(v=>v&&typeof v.id==='string'&&isWebUrl(v.url)).map(v=>({...v,tags:Array.isArray(v.tags)?v.tags:[],sections:Array.isArray(v.sections)?v.sections:[]}));}catch{}
+let videos=[];try{const data=JSON.parse(storage.getItem(KEY)||'[]');if(Array.isArray(data))videos=data.filter(v=>v&&typeof v.id==='string'&&isWebUrl(v.url)).map(v=>({...v,tags:Array.isArray(v.tags)?v.tags:[],sections:Array.isArray(v.sections)?v.sections:[]}));}catch{}
 let active='全部',query='',sort='new',onlyFavorites=false;
-function persist(next){try{localStorage.setItem(KEY,JSON.stringify(next));videos=next;return true;}catch{alert('儲存空間不足，請縮小封面圖片後重試。這次變更尚未儲存。');return false;}}
+function persist(next){try{storage.setItem(KEY,JSON.stringify(next));videos=next;return true;}catch{alert('儲存空間不足，請縮小封面圖片後重試。這次變更尚未儲存。');return false;}}
 export function renderVideoSection(root){
  root.innerHTML=`<div class="video-intro"><div><span class="video-eyebrow">THE VIDEO COLLECTION</span><p>留住那些，想再看一次的片刻。</p></div><button class="video-add" type="button"><i class="bi bi-plus-lg"></i> 收藏影片</button></div><div class="video-controls"><label class="video-search"><i class="bi bi-search"></i><input aria-label="搜尋影片" placeholder="搜尋標題、創作者、分區…" value="${esc(query)}"></label><button class="video-favorites" aria-pressed="${onlyFavorites}"><i class="bi bi-heart"></i> 最愛</button><select class="video-sort" aria-label="排序"><option value="new">最近收藏</option><option value="old">最早收藏</option><option value="title">標題排序</option></select></div><div class="video-tags" aria-label="影片分區"></div><div class="video-results" aria-live="polite"></div><div class="video-grid"></div>`;
  const draw=()=>{

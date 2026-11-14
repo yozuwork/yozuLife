@@ -1,8 +1,9 @@
+import { storage } from './cloud-storage.js';
 import {MAPS_KEY,MODES,validMap,mapsURL,mapPreviewURL,initializeMaps,filterMaps} from './maps-data.js';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function renderMapsSection(root){
   let items;
-  try{items=initializeMaps(localStorage);}catch{root.innerHTML='<p role="alert">無法讀取或儲存地圖收藏。請確認瀏覽器儲存設定後再試。</p>';return;}
+  try{items=initializeMaps(storage);}catch{root.innerHTML='<p role="alert">無法讀取或儲存地圖收藏。請確認瀏覽器儲存設定後再試。</p>';return;}
   let editingId=null,category='',query='';
   root.innerHTML=`<section class="maps-panel">
     <h3>地點與路線</h3>
@@ -46,7 +47,7 @@ export function renderMapsSection(root){
     const area=$('#map-preview');area.hidden=false;
     area.innerHTML=`<div class="map-preview-heading"><strong>${esc(item.title)}</strong><a href="${esc(mapsURL(item))}" target="_blank" rel="noopener noreferrer">${item.type==='route'?'查看 A → B 完整路線':'Google Maps 開啟'} ↗</a></div>${item.type==='route'?`<p class="medical-caption">${esc(item.origin)} → ${esc(item.destination)} · ${MODES[item.mode]}<br>下方預覽目的地；請點上方連結查詢完整路線與行程時間。</p>`:''}<iframe title="${esc(item.title)} 地圖預覽" src="${esc(mapPreviewURL(item.destination))}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><p class="medical-caption">預覽若無法載入，可直接開啟 Google Maps。</p>`;
   }
-  function persist(next){try{localStorage.setItem(MAPS_KEY,JSON.stringify(next));items=next;return true;}catch{message.textContent='儲存失敗，請確認瀏覽器儲存空間後重試。';return false;}}
+  function persist(next){try{storage.setItem(MAPS_KEY,JSON.stringify(next));items=next;return true;}catch{message.textContent='儲存失敗，請確認瀏覽器儲存空間後重試。';return false;}}
   function render(){
     const categories=[...new Set(items.map(i=>i.category))];
     if(category&&!categories.includes(category))category='';

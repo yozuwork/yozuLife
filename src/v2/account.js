@@ -11,6 +11,17 @@ function setStatus(text) {
   mobileStatus.textContent = text;
   mobileStatus.hidden = !text;
 }
+window.addEventListener('yozu-sync-status', event => setStatus(event.detail));
+if (window.yozuSyncStatus) setStatus(window.yozuSyncStatus);
+window.addEventListener('yozu-remote-change', () => {
+  if (document.getElementById('cloud-refresh')) return;
+  const refresh = document.createElement('button');
+  refresh.id = 'cloud-refresh';
+  refresh.type = 'button';
+  refresh.textContent = '載入其他裝置的更新';
+  refresh.onclick = () => location.reload();
+  status.parentElement.append(refresh);
+});
 let user = null;
 let busy = false;
 let ready = false;

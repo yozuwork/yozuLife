@@ -1,3 +1,4 @@
+import { storage } from './cloud-storage.js';
 import { renderVideoSection } from './videos.js';
 import './account.js';
 import { renderMedicalSection } from './medical.js';
@@ -31,7 +32,7 @@ let SECTIONS = [
 const KEY = 'yozulife:v1';
 let state = { order: SECTIONS.map(s=>s.id), pinned: [] };
 try{
-  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  const saved = JSON.parse(storage.getItem(KEY) || 'null');
   if(saved && Array.isArray(saved.order)){
     if(Array.isArray(saved.sections)){
       const ids = new Set();
@@ -45,12 +46,12 @@ try{
     state.pinned = Array.isArray(saved.pinned) ? saved.pinned.filter(id=>known.includes(id)) : [];
   }
 }catch(e){}
-const save = ()=>{ try{ localStorage.setItem(KEY, JSON.stringify({...state, sections:SECTIONS})); }catch(e){ document.getElementById('account-status').textContent = '無法儲存分區設定，請確認瀏覽器儲存空間；重新整理後可能遺失變更。'; } };
+const save = ()=>{ try{ storage.setItem(KEY, JSON.stringify({...state, sections:SECTIONS})); }catch(e){ document.getElementById('account-status').textContent = '無法儲存分區設定，請確認瀏覽器儲存空間；重新整理後可能遺失變更。'; } };
 const byId = id => SECTIONS.find(s=>s.id===id);
 // Attach the medical feature to an existing user-created consultation section.
 let medicalSection = SECTIONS.find(s=>s.feature==='medical' || /看[診整]|就醫/.test(s.name));
 let medicalAdded = false;
-try{medicalAdded=localStorage.getItem('yozulife:medical-section-added')==='1';}catch{}
+try{medicalAdded=storage.getItem('yozulife:medical-section-added')==='1';}catch{}
 if(!medicalSection){
   medicalSection = {id:'medical',name:'看診分區',group:'生活',icon:'bi:hospital-fill',color:'#4F6B47',keywords:'看診 內分泌 定期檢查 醫療',feature:'medical'};
   if(!medicalAdded){
@@ -61,16 +62,16 @@ if(!medicalSection){
 if(SECTIONS.includes(medicalSection)){
   medicalSection.feature='medical'; save();
 }
-try{localStorage.setItem('yozulife:medical-section-added','1');}catch{}
+try{storage.setItem('yozulife:medical-section-added','1');}catch{}
 let mapSection=SECTIONS.find(s=>s.feature==='maps'||/地圖/.test(s.name));
 let mapsAdded=false;
-try{mapsAdded=localStorage.getItem('yozulife:maps-section-added')==='1';}catch{}
+try{mapsAdded=storage.getItem('yozulife:maps-section-added')==='1';}catch{}
 if(!mapSection&&!mapsAdded){
   mapSection={id:`maps-${crypto.randomUUID()}`,name:'地圖',group:'交通',icon:'bi:map-fill',color:'#3F6186',keywords:'地圖 地址 路線 導航 maps',feature:'maps'};
   SECTIONS.push(mapSection);state.order.push(mapSection.id);
 }
 if(mapSection){mapSection.feature='maps';save();}
-try{localStorage.setItem('yozulife:maps-section-added','1');}catch{}
+try{storage.setItem('yozulife:maps-section-added','1');}catch{}
 let videoSection=SECTIONS.find(s=>s.feature==='videos'||/影片|視頻/.test(s.name));
 if(!videoSection){
  videoSection={id:'videos',name:'影片',group:'生活',icon:'bi:youtube',color:'#8B8245',keywords:'影片 收藏 video youtube bilibili',feature:'videos'};

@@ -1,3 +1,4 @@
+import { storage } from './cloud-storage.js';
 import { VISIT_KEY, loadVisits, validVisit, splitVisits, taipeiDate, untilNextTaipeiDay } from './medical-data.js';
 
 const escape = value => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -7,7 +8,7 @@ let stopDateRefresh = () => {};
 export function renderMedicalSection(root){
   stopDateRefresh();
   let visits;
-  try{ visits=loadVisits(localStorage); }catch{
+  try{ visits=loadVisits(storage); }catch{
     root.innerHTML='<section class="medical-panel"><h3>內分泌定期檢查專區</h3><p role="alert">無法讀取看診紀錄，請確認瀏覽器儲存設定後重新開啟。原有資料未被覆寫。</p></section>';
     return;
   }
@@ -39,7 +40,7 @@ export function renderMedicalSection(root){
     root.querySelector('#visit-history').innerHTML=`<h4>歷史看診 <small>${history.length} 筆</small></h4>${history.length?history.map(card).join(''):'<p class="medical-caption">看診日期過後會自動歸入歷史；也可手動標記為已完成。</p>'}`;
   }
   function persist(next){
-    try{localStorage.setItem(VISIT_KEY,JSON.stringify(next)); visits=next; return true;}
+    try{storage.setItem(VISIT_KEY,JSON.stringify(next)); visits=next; return true;}
     catch{message.textContent='儲存失敗，請確認瀏覽器儲存空間後重試。';return false;}
   }
   function reset(){form.reset();editingId=null;editor.querySelector('summary').textContent='＋ 新增看診紀錄';editor.open=false;}
@@ -66,7 +67,7 @@ export function renderMedicalSection(root){
     if(persist(next)){reset();render();message.textContent='看診紀錄已儲存於此瀏覽器。';}
   };
   // Persist the initial visit once, so deleting every record remains an empty list.
-  if(localStorage.getItem(VISIT_KEY)===null) persist(visits);
+  if(storage.getItem(VISIT_KEY)===null) persist(visits);
   render();
   let renderedDate=today(), timer;
   function refreshDate(){
